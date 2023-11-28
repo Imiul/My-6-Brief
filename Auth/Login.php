@@ -1,4 +1,6 @@
 <?php
+
+session_start();
 include('-- Database/db-connection.php');
 
 if (isset($_POST['login'])) {
@@ -7,42 +9,53 @@ if (isset($_POST['login'])) {
     $password = $_POST['password'];
 
     if (empty($username) || empty($password)) {
-
         echo "<script>window.alert('Please fill in both email and password.')</script>";
+        
     } else {
-        // Use prepared statements to prevent SQL injection
-        $query = "SELECT * FROM user WHERE username = ? AND password = ?";
-        $stmt = $cnx->prepare($query);
+        
+        // $query = "SELECT * FROM user WHERE username = '$username' AND password = '$password'";
+        // $run_query = mysqli_query($cnx, $query);
 
-        // Bind parameters
-        $stmt->bind_param('ss', $username, $password);
+        // $row = mysqli_fetch_array($run_query);
+        
+        // $_SESSION["user_id"] = $row['id'];
+        // $_SESSION["name"] = $row['name'];
+        // $_SESSION["user_type"] = $row['user_type'];
 
-        // Execute the statement
-        $stmt->execute();
+        // if ($row['role_id'] === "Admin") {
+        //     header("Location: Admin/index.php");
+        // } 
+        // else if ($row['role_id'] === "User") {
+        //     header("Location: User/Data.php");
+        // } else {
+        //     echo "<script>window.alert('USERNAME or PASSWORD incorrect');</script>";
+        // }
 
-        // Get the result
-        $result = $stmt->get_result();
+        // Use prepared statement to prevent SQL injection
+        $query = "SELECT * FROM user WHERE username = ?";
+        $stmt = mysqli_prepare($cnx, $query);
+        mysqli_stmt_bind_param($stmt, "s", $username);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $row = mysqli_fetch_array($result);
 
-        if ($result && $result->num_rows > 0) {
+        if ($row && password_verify($password, $row['password'])) {
 
-            if ($user['role'] === 'admin') {
-                echo "Login successful! You are an admin.";
-                header('Location: Admin/index.php');
-                // Add admin-specific actions if needed
-            } else {
-                echo "Login successful! You are a regular user.";
-                header('Location: User/Data.php');
-                // Add user-specific actions if needed
-            }
+            $_SESSION["user_id"] = $row['id'];
+            $_SESSION["name"] = $row['username'];
+            $_SESSION["user_type"] = $row['role_id'];
 
-
-
-        } else {
-            echo "<script>window.alert('Invalid email or password.')</script>";
+            if ($_SESSION["user_type"] === "Admin") {
+                header("Location: Admin/index.php");
+                exit;
+            } else if ($row['role_id'] === "User") {
+                header("Location: User/Data.php");
+                exit;
+            } 
         }
-
-        // Close the statement
-        $stmt->close();
+        else {
+                echo "<script>window.alert('USERNAME or PASSWORD incorrect');</script>";
+            }
     }
 }
 ?>

@@ -1,3 +1,68 @@
+
+<?php
+
+
+    session_start();
+    if (!isset($_SESSION['name']) || $_SESSION['user_type'] != "Admin") {
+        header("Location: ../../Login.php");
+        exit;
+    }
+    
+    include('../../-- DATABASE/db-connection.php');
+
+    if (isset($_POST['add_atm'])) {
+        
+        $agenceId = $_POST['agenceId'];
+        $longitude = $_POST['longitude'];
+        $laltitude = $_POST['laltitude'];
+
+        $getBankId = "SELECT bank_id FROM agence WHERE id = $agenceId";
+        // $bankId = mysqli_fetch_assoc($cnx->query($getBankId));
+        $result = mysqli_query($cnx, $getBankId);
+
+        $row = mysqli_fetch_assoc($result);
+        $bankId = $row['bank_id'];
+
+
+        if (empty($agenceId) || empty($longitude) || empty($laltitude)) {
+            echo "<script>window.alert('Inputs should not be empty');</script>";
+        } else {
+
+            $query = "
+                INSERT INTO distributeur (bank_id, longitude, latitude, agence_id)
+                VALUES ('$bankId', $longitude, $laltitude, $agenceId);
+            ";
+
+            $run_query = mysqli_query($cnx, $query);
+            echo "<script>window.alert('distrubuteur Added succesfully');</script>";
+        }
+    }
+
+    $fetchAtm = "SELECT * FROM distributeur";
+    $AtmData = $cnx->query($fetchAtm);
+
+    $fetchAgencies = "SELECT * FROM agence";
+    $AgenciesData = $cnx->query($fetchAgencies);
+
+    if (isset($_GET['rm'])) {
+
+        $Atm_to_remove = $_GET['rm'];
+
+        $delete_Atm = "DELETE FROM distributeur WHERE id = $Atm_to_remove";
+
+        $run_delete = mysqli_query($cnx, $delete_Atm);
+        echo "<script>window.alert('distrubuteur Deleted succesfully');</script>";
+        header("Location: Atm.php");
+    }
+
+    if (isset($_POST['logout'])) {
+        session_unset();
+        session_destroy();
+        header('Location: ../../Login.php');
+        exit();
+    }
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,6 +95,19 @@
                     </div>
                 </div>
                 </div>
+                <div class="hidden md:block">
+
+                <div class="ml-4 flex items-center md:ml-6">
+                    <!-- <button >Log Out</button> -->
+                    <form method="post" style="display: flex; align-items: center;">
+                        <?php
+                        echo "<h3 style='color: white; margin-right: 30px;'> ( User Name : " . $_SESSION['name']. " )</h3>";
+                        ?>
+                        <button style="color: red;" name="logout" type="submit">Log Out</button>
+                    </form>
+                </div>
+                
+                </div>
             </div>
             </div>
 
@@ -39,19 +117,23 @@
 
         <!-- PAGE CONTENT ===================== -->
         <section class="mt-20 mx-auto max-w-7xl py-6 sm:px-6 lg:px-8" >
-            <form action="Atm.php" placeholder class="grid gap-4 grid-cols-2 border-b-4 border-gray-600 pb-4">
-                <select name="type" class="pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
+            <form method="post" placeholder class="grid gap-4 grid-cols-2 border-b-4 border-gray-600 pb-4">
+                <!-- <select name="type" class="pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
                     <option value="" selected>Choose bank</option>
                     <option value="credit">CIH BANK</option>
-                </select> 
+                </select>  -->
                 <select name="agenceId" class="pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
                     <option value="">Choose Agency </option>
-                    <option value="1">Agency 1</option>
+                    <?php
+                        foreach($AgenciesData as $agency) {
+                            echo "<option value='" . $agency['id'] . "'>" . $agency['bank_name']. " </option>";
+                        }
+                    ?>  
                 </select> 
                 <input name="longitude" type="text" placeholder="Longitude" class=" pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
                 <input name="laltitude" type="text" placeholder="Laltitude" class=" pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
 
-                <button type="submit" class="bg-gray-600 text-white text-xl rounded">Add ATM</button>
+                <button name="add_atm" type="submit" class="bg-gray-600 text-white text-xl rounded">Add ATM</button>
             </form>
         </section>
 
@@ -67,26 +149,31 @@
                         <thead class="border-b font-medium dark:border-neutral-500">
                             <tr>
                                 <th scope="col" class="px-6 py-4">#</th>
-                                <th scope="col" class="px-6 py-4">Bank Name</th>
                                 <th scope="col" class="px-6 py-4">Longitude</th>
-                                <th scope="col" class="px-6 py-4">Laltitude</th>
+                                <th scope="col" class="px-6 py-4">Latitude</th>
+                                <th scope="col" class="px-6 py-4">Bank ID</th>
                                 <th scope="col" class="px-6 py-4">Agency ID</th>
                                 <th scope="col" class="px-6 py-4">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="border-b dark:border-neutral-500">
-                                <td class="whitespace-nowrap px-6 py-4 font-medium">1</td>
-                                <td class="whitespace-nowrap px-6 py-4">Mark</td>
-                                <td class="whitespace-nowrap px-6 py-4">7QV7+6X</td>
-                                <td class="whitespace-nowrap px-6 py-4">7QV7+6X</td>
-                                <td class="whitespace-nowrap px-6 py-4">1</td>
+                            <?php
+                                foreach($AtmData as $Atm) {
+                                    echo "<tr class='border-b dark:border-neutral-500'>";
 
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <button class="bg-blue-600 py-2 px-8 text-white font-bold">Edit</button>
-                                    <button class="bg-red-600 py-2 px-8 text-white font-bold">Remove</button>
-                                </td>
-                            </tr>
+                                    echo "<td class='whitespace-nowrap px-6 py-4 font-medium'>" . $Atm['id'] . "</td>";
+                                    echo "<td class='whitespace-nowrap px-6 py-4'>" . $Atm['longitude'] . "</td>";
+                                    echo "<td class='whitespace-nowrap px-6 py-4'>" . $Atm['latitude'] . "</td>";
+                                    echo "<td class='whitespace-nowrap px-6 py-4'>" . $Atm['bank_id'] . "</td>";
+                                    echo "<td class='whitespace-nowrap px-6 py-4'>" . $Atm['agence_id'] . "</td>";
+
+                                    echo "<td class='whitespace-nowrap px-6 py-4'>";
+                                    echo "<button class='bg-blue-600 mr-4 py-2 px-8 text-white font-bold'>Edit</button>";
+                                    echo "<a href='Atm.php?rm=" . $Atm['id'] . "' class='bg-red-600 py-2 px-8 text-white font-bold'>Remove</a>";
+                                    echo "</td>";
+                                    echo "</tr>";
+                                }
+                            ?>
                         </tbody>
                         </table>
                     </div>

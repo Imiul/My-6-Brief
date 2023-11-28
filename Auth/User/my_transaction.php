@@ -8,14 +8,47 @@
         exit();
     }
 
+    if (isset($_POST['add_transaction'])) {
 
-    if (isset($_GET['rm'])) {
-        $id_to_remove = $_GET['rm'];
+        $accountId = $_POST['AccountId'];
+        $type = $_POST['type'];
+        $amount = $_POST['amount'];
 
-        $run_delete = "DELETE FROM account WHERE id = $id_to_remove";
-        $run_delete = mysqli_query($cnx, $run_delete);
-        echo "<script>window.alert('Account Deleted Succesfully');</script>";
-        header("Location: Data.php");
+        if ($type === 0 || $amount == 0 || empty($amount)) {
+            echo "<script>alert('Inputs should not be empty');</script>";
+        } else {
+
+            $query = "
+                INSERT INTO transaction (type, amount, account_id)
+                VALUES ('$type', '$amount', '$accountId');
+            ";
+            $run_query = mysqli_query($cnx, $query);
+
+
+            if ($type == "credit") {
+                
+                $update_amount = "
+                    UPDATE account
+                    SET balance =   balance + $amount
+                    WHERE id = $accountId
+                ";
+
+                $updating = mysqli_query($cnx, $update_amount);
+                echo "<script>window.alert('Balance Updated Succesfully & Transaction Added');</script>";
+
+            } else {
+
+                $update_amount = "
+                    UPDATE account
+                    SET balance =   balance - $amount
+                    WHERE id = $accountId
+                ";
+
+                $updating = mysqli_query($cnx, $update_amount);
+                echo "<script>window.alert('Transaction Added & Balance Updated Succesfully');</script>";
+
+            }
+        }
     }
 
     if (isset($_POST['logout'])) {
@@ -35,7 +68,7 @@
 
     <!-- TAILWIND CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Account's</title>
+    <title>Transaction's</title>
 </head>
 <body>
 
@@ -47,8 +80,8 @@
 
                 <div class="hidden md:block">
                     <div class=" flex items-baseline space-x-4">
-                    <a href="Data.php" class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium" aria-current="page">Your Personal Data</a>
-                    <a href="my_transaction.php" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Transaction's</a>
+                    <a href="Data.php"  class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium" >Your Personal Data</a>
+                    <a href="my_transaction.php" class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium">Transaction's</a>
                     </div>
                 </div>
                 </div>
@@ -82,6 +115,41 @@
             </div>
         </header>
 
+
+        <section id="add" class="mt-12 mx-auto max-w-7xl py-6 sm:px-6 lg:px-8 " >
+            <!-- <h3 class="sm:px-20">Add A User</h3> -->
+            <form method="post" class="grid gap-4 grid-cols-2 border-b-4 border-gray-600 pb-4">
+                <select name="AccountId" class="pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
+                    <option value="0">Choose One Of Your Account</option>
+                    <?php
+                    
+                        $user_name = $_SESSION['name'];
+                        $find_user_id = "SELECT * FROM user WHERE username = '$user_name'";
+                        $run_find_user_id = mysqli_query($cnx, $find_user_id);
+
+                        foreach($run_find_user_id as $user) {
+                            
+                            $id_to_find = $user['id'];
+                            $fetchaccount = "SELECT * FROM account WHERE user_id = $id_to_find";
+                            $data = $cnx->query($fetchaccount);
+
+                            foreach($data as $user_account) {
+                                echo "<option value='" . $user_account['id'] ."' > ( Account Id : " . $user_account['id'] . " ) ( Rib : " . $user_account['rib'] . " )</option>";
+                            }
+                        }
+
+                    ?>
+                </select>
+                <select name="type" class="pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
+                    <option value="0">Transaction Type</option>
+                    <option value="credit">credit</option>
+                    <option value="debit">debit</option>
+                </select>    
+                <input name="amount" type="number" placeholder="Amount" class="pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6">
+                
+                <button type="submit" name="add_transaction" class="bg-gray-600 text-white text-xl rounded">Make A Transaction</button>
+            </form>
+        </section>
 
         <main>
             <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
@@ -139,48 +207,7 @@
                     </div>
                 </div>
             </div>
-            </div>
-                            
-
-            <table class="min-w-full mt-8 text-left text-sm font-light" >
-                        <thead class="border-b font-medium dark:border-neutral-500  border-2 border-gray-600 bg-gray-300">
-                            <tr>
-                                <th scope="col" class="px-6 py-4">Account id</th>
-                                <th scope="col" class="px-6 py-4">Rib</th>
-                                <th scope="col" class="px-6 py-4">Devise</th>
-                                <th scope="col" class="px-6 py-4">Balance</th>
-                                <th scope="col" class="px-6 py-4">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody class=" border-2 border-gray-600">
-
-                        <?php
-
-                            $find_id = "SELECT id FROM user WHERE username = '$user_name'";
-                            $run_find_id = mysqli_query($cnx, $find_id);
-                            
-                            foreach($run_find_id as $id) {
-                                $find_this_id =  $id['id']; 
-                            }
-
-                            $find_accounts = "SELECT * FROM account WHERE user_id = $find_this_id";
-                            $run_find_accounts = mysqli_query($cnx, $find_accounts);
-
-                            foreach($run_find_accounts as $accounts_filtred) {
-                                echo "<tr class='border-2 border-gray-600 ' >";
-                                echo "<td scope='col' class='px-6 py-4'>" . $accounts_filtred['id'] . "</th>";
-                                echo "<td scope='col' class='px-6 py-4'>" . $accounts_filtred['rib'] . "</th>";
-                                echo "<td scope='col' class='px-6 py-4'>" . $accounts_filtred['devise'] . "</th>";
-                                echo "<td scope='col' class='px-6 py-4'>" . $accounts_filtred['balance'] . "</th>";
-                                echo "<td scope='col' class='px-6 py-4'>";
-                                echo "<a href='Data.php?rm=" . $accounts_filtred['id'] . "' class='bg-red-600 py-2 px-8 text-white font-bold'>Remove</a>";
-                                echo "</th>";
-                                echo "</tr>";
-                            }
-                        ?>
-                        </tbody>
-                        </table>
-            </div>
+            
             </main>
     </div>
 

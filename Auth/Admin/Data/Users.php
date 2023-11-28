@@ -1,28 +1,62 @@
 <?php
 
+
+    session_start();
+    if (!isset($_SESSION['name']) || $_SESSION['user_type'] != "Admin") {
+        header("Location: ../../Login.php");
+        exit;
+    }
+
     include('../../-- Database/db-connection.php');
-
-    $fetchRoles = "SELECT * FROM role;";
-    $rolesData = $cnx->query($fetchRoles);
-
 
 
     if (isset($_POST['add_user'])) {
         
-        $username = $_POST('UserName');
-        $password = $_POST('password');
-        $address_id = $_POST('AddressId');
-        $userRole = $_POST('userRole');
+        $username = $_POST['UserName'];
+        $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+        $address_id = $_POST['AddressId'];
+        $userRole = $_POST['userRole'];
 
         if (empty($username) || empty($password) || empty($address_id)) {
             echo "<script>window.alert('Inputs Shuld Not Be Empty');</script>";
         } else {
 
             $query = "
-                INSERT INTO user (username, password, role_id, address_id)
-                VALUES ($username, $password, $userRole, $address_id)
+            INSERT INTO user (username, password, role_id, address_id)
+                VALUES ('$username', '$password', '$userRole', '$address_id')
             ";
+
+            $run_query = mysqli_query($cnx, $query);
+            echo "<script>window.alert('User Added Successfully');</script>";
+
+
         }
+    }
+
+    $fetchRoles = "SELECT * FROM role;";
+    $rolesData = $cnx->query($fetchRoles);
+
+    $fetchAddress = "SELECT * FROM address;";
+    $addresesData = $cnx->query($fetchAddress);
+
+    $fetchusers = "SELECT * FROM user;";
+    $userData = $cnx->query($fetchusers);
+
+    if (isset($_GET['rm'])) {
+
+        $id_to_delete = $_GET['rm'];
+        $delete_user = "DELETE FROM user WHERE id = $id_to_delete";
+
+        $run_delete = mysqli_query($cnx, $delete_user);
+        echo "<script>window.alert('User Deleted Successfully');</script>";
+        header("Location: Users.php");
+    }
+    
+    if (isset($_POST['logout'])) {
+        session_unset(); // Unset all session variables
+        session_destroy(); // Destroy the session
+        header('Location: ../../Login.php');
+        exit();
     }
 
 ?>
@@ -59,6 +93,20 @@
                     </div>
                 </div>
                 </div>
+
+                <div class="hidden md:block">
+
+                <div class="ml-4 flex items-center md:ml-6">
+                    <!-- <button >Log Out</button> -->
+                    <form method="post" style="display: flex; align-items: center;">
+                        <?php
+                        echo "<h3 style='color: white; margin-right: 30px;'> ( User Name : " . $_SESSION['name']. " )</h3>";
+                        ?>
+                        <button style="color: red;" name="logout" type="submit">Log Out</button>
+                    </form>
+                </div>
+                
+                </div>
             </div>
             </div>
         </nav>
@@ -67,10 +115,19 @@
         <!-- PAGE CONTENT ===================== -->
         <section id="add" class="mt-20 mx-auto max-w-7xl py-6 sm:px-6 lg:px-8 " >
             <!-- <h3 class="sm:px-20">Add A User</h3> -->
-            <form id="add_user" action="Users.php" placeholder class="grid gap-4 grid-cols-2 border-b-4 border-gray-600 pb-4">
+            <form method="post" placeholder class="grid gap-4 grid-cols-2 border-b-4 border-gray-600 pb-4">
                 <input name="UserName" type="text" placeholder="User UserName" class=" pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
                 <input name="password" type="text" placeholder="Password" class="pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6">
-                <input name="AddressId" type="text" placeholder="User Address Id" class="pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6">
+                
+                <select name="AddressId" class="pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6">
+                    <option value="">select user address</option>
+                    <?php
+                        foreach($addresesData as $address) {
+                            echo "<option value='" . $address['id'] . "' >". $address['id'] . " / " . $address['ville'] . " / " . $address['quartier'] . " / " . $address['rue'] .  " / " . $address['code_postal'] .  " / " . $address['email'] . " / " .    $address['telephone'] ."</option>";
+                        }
+                    ?>
+                </select>
+
                 <select name="userRole" class="pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6">
                     <option value="">Choose User Role</option>
                     <?php
@@ -78,11 +135,9 @@
                             echo "<option value=" . $role['name'] . ">" . $role['name'] . "</option>";
                         }
                     ?>
-                    <option value="Admin">Admin</option>
-                    <option value="User">User</option>
                 </select>
 
-                <button type="submit" class="bg-gray-600 text-white text-xl rounded">Add User</button>
+                <button type="submit" name="add_user" class="bg-gray-600 text-white text-xl rounded">Add User</button>
             </form>
         </section>
 
@@ -104,18 +159,26 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="border-b dark:border-neutral-500">
-                                <td class="whitespace-nowrap px-6 py-4 font-medium">1</td>
-                                <td class="whitespace-nowrap px-6 py-4">t-amiine</td>
-                                <td class="whitespace-nowrap px-6 py-4">hdfkjbds</td>
-                                <td class="whitespace-nowrap px-6 py-4">1</td>
-                                <td class="whitespace-nowrap px-6 py-4">Admin</td>
 
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <button class="bg-blue-600 py-2 px-8 text-white font-bold">Edit</button>
-                                    <button class="bg-red-600 py-2 px-8 text-white font-bold">Remove</button>
-                                </td>
-                            </tr>
+                            <?php 
+
+                                foreach($userData as $user) {
+                                    echo "<tr class='border-b dark:border-neutral-500'>";
+                                    echo "<td class='whitespace-nowrap px-6 py-4 font-medium'>". $user['id']. "</td>";
+                                    echo "<td class='whitespace-nowrap px-6 py-4'>". $user['username']. "</td>";
+                                    echo "<td class='whitespace-nowrap px-6 py-4'>". $user['password']. "</td>";
+                                    echo "<td class='whitespace-nowrap px-6 py-4'>". $user['address_id']. "</td>";
+                                    echo "<td class='whitespace-nowrap px-6 py-4'>". $user['role_id']. "</td>";
+                                    // echo "<td class='whitespace-nowrap px-6 py-4'>". $user['role_id']. "</td>";
+
+                                    echo "<td class='whitespace-nowrap px-6 py-4'>";
+                                    echo "<button class='bg-blue-600 py-2 px-8 text-white font-bold'>Edit</button>";
+                                    echo "<a href='Users.php?rm=" . $user['id'] . "' class='bg-red-600 py-2 ml-2 px-8 text-white font-bold'>Remove</a>";
+                                    echo "</td>";
+
+                                    echo "</td>";
+                                }
+                            ?>
                         </tbody>
                         </table>
                     </div>

@@ -1,4 +1,11 @@
 <?php 
+
+    session_start();
+    if (!isset($_SESSION['name']) || $_SESSION['user_type'] != "Admin") {
+        header("Location: ../../Login.php");
+        exit;
+    }
+
     include('../../-- Database/db-connection.php');
 
     
@@ -12,12 +19,30 @@
             $query = "INSERT INTO role (name) VALUES ('$role_name')";
             $run_query = mysqli_query($cnx, $query);
 
-            echo "<script>alert('Data Insered Succesfuly');</script>";
+            echo "<script>alert('Role Added Succesfuly');</script>";
         }
+    }
+
+    if (isset($_GET['rm'])) {
+        $id_to_remove = $_GET['rm'];
+
+        $query = "
+            DELETE FROM `role` WHERE `id` = '$id_to_remove';
+        ";
+
+        $run_query = mysqli_query($cnx, $query);
+        echo "<script>window.alert('Role Deleated Succesfully');</script>";
     }
 
     $fetchRoles = "SELECT * FROM role;";
     $rolesData = $cnx->query($fetchRoles);
+
+    if (isset($_POST['logout'])) {
+        session_unset(); // Unset all session variables
+        session_destroy(); // Destroy the session
+        header('Location: ../../Login.php');
+        exit();
+    }
 ?>
 
 <!DOCTYPE html>
@@ -51,6 +76,19 @@
                     <a href="Transactions.php" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Transaction's</a>
                     </div>
                 </div>
+                </div>
+                <div class="hidden md:block">
+
+                <div class="ml-4 flex items-center md:ml-6">
+                    <!-- <button >Log Out</button> -->
+                    <form method="post" style="display: flex; align-items: center;">
+                        <?php
+                        echo "<h3 style='color: white; margin-right: 30px;'> ( User Name : " . $_SESSION['name']. " )</h3>";
+                        ?>
+                        <button style="color: red;" name="logout" type="submit">Log Out</button>
+                    </form>
+                </div>
+                
                 </div>
             </div>
             </div>
@@ -92,7 +130,7 @@
                                 echo "<td class='whitespace-nowrap px-6 py-4'>" . $role['name'] . "</td>";
                                 echo "<td class='whitespace-nowrap px-6 py-4'>";
                                 echo "<button class='bg-blue-600 mr-4 py-2 px-8 text-white font-bold'>Edit</button>";
-                                echo "<button class='bg-red-600 py-2 px-8 text-white font-bold'>Remove</button>";
+                                echo "<a href='Roles.php?rm=" . $role['id'] . "' class='bg-red-600 py-2 px-8 text-white font-bold'>Remove</a>";
                                 echo "</td>";
                                 echo "</tr>";
                                 

@@ -1,9 +1,16 @@
 <?php
-
+    
+    session_start();
+    if (!isset($_SESSION['name']) || $_SESSION['user_type'] != "Admin") {
+        header("Location: ../../Login.php");
+        exit;
+    }
+    
     include('../../-- Database/db-connection.php');
 
-    $fetchAddress = "SELECT * FROM address;";
-    $addresesData = $cnx->query($fetchAddress);
+    $moroccoCities = array(
+        'Casablanca', 'Rabat', 'Marrakech', 'Fes', 'Agadir', 'Tangier', 'Essaouira', 'Meknes', 'Ouarzazate', 'Chefchaouen', 'Zemamra', 'Safi'
+    );
 
     if (isset($_POST['addAddress'])) {
 
@@ -25,8 +32,32 @@
             ";
     
             $run_query = mysqli_query($cnx, $query);
-            echo "<script>window.alert('Data Inserted Successfully');</script>";
+            echo "<script>window.alert('Address Added Successfully');</script>";
         }
+    }
+
+
+    if (isset($_GET['rm'])) {
+        $id_to_remove = $_GET['rm'];
+
+        $query = "
+            DELETE FROM `address` WHERE id = '$id_to_remove';
+        ";
+
+        $run_query = mysqli_query($cnx, $query);
+        echo "<script>window.alert('Address Deleated Succesfully');</script>";
+        header("Location: Addresses.php");
+    }
+
+
+    $fetchAddress = "SELECT * FROM address;";
+    $addresesData = $cnx->query($fetchAddress);
+
+    if (isset($_POST['logout'])) {
+        session_unset(); // Unset all session variables
+        session_destroy(); // Destroy the session
+        header('Location: ../../Login.php');
+        exit();
     }
 
 ?>
@@ -63,6 +94,19 @@
                     </div>
                 </div>
                 </div>
+                <div class="hidden md:block">
+
+                <div class="ml-4 flex items-center md:ml-6">
+                    <!-- <button >Log Out</button> -->
+                    <form method="post" style="display: flex; align-items: center;">
+                        <?php
+                        echo "<h3 style='color: white; margin-right: 30px;'> ( User Name : " . $_SESSION['name']. " )</h3>";
+                        ?>
+                        <button style="color: red;" name="logout" type="submit">Log Out</button>
+                    </form>
+                </div>
+                
+                </div>
             </div>
             </div>
 
@@ -74,7 +118,14 @@
         <section class="mt-20 mx-auto max-w-7xl py-6 sm:px-6 lg:px-8" >
             <form method="post" action="Addresses.php" placeholder class="grid gap-4 grid-cols-2 border-b-4 border-gray-600 pb-4">
                 
-                <input name="ville" type="text" placeholder="Ville" class=" pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
+                <select name="ville" class=" pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
+                    <option value="0">Choose City</option>
+                    <?php
+                        foreach ($moroccoCities as $city) {
+                            echo "<option value='$city'>$city</option>";
+                        }
+                    ?>
+                </select>    
                 <input name="quartier" type="text" placeholder="Quartier" class=" pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
                 <input name="rue" type="text" placeholder="Rue" class=" pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
                 <input name="codePostal" type="text" placeholder="Code Postal" class=" pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
@@ -120,7 +171,7 @@
                                 echo "<td class='whitespace-nowrap px-6 py-4'>" . $addres['telephone'] . "</td>";
                                 echo "<td class='whitespace-nowrap px-6 py-4'>";
                                 echo "<button class='bg-blue-600 mr-4 py-2 px-8 text-white font-bold'>Edit</button>";
-                                echo "<button class='bg-red-600 py-2 px-8 text-white font-bold'>Remove</button>";
+                                echo "<a href='Addresses.php?rm=" . $addres['id'] ."' class='bg-red-600 py-2 px-8 text-white font-bold'>Remove</a>";
                                 echo "</td>";
                                 echo "</tr>";
                                 
