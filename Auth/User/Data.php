@@ -49,6 +49,7 @@
                     <div class=" flex items-baseline space-x-4">
                     <a href="Data.php" class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium" aria-current="page">Your Personal Data</a>
                     <a href="my_transaction.php" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Transaction's</a>
+                    <a href="Reset_password.php" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Reset Password</a>
                     </div>
                 </div>
                 </div>
@@ -75,13 +76,6 @@
         </nav>
 
 
-        <!-- HEADER ===================== -->
-        <header class="bg-white shadow">
-            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold tracking-tight text-gray-900">User Dashboard</h1>
-            </div>
-        </header>
-
 
         <main>
             <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
@@ -89,12 +83,13 @@
                 <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
                     <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
                     <div class="overflow-hidden">
+                        <h2 class="text-xl py-4">Your Personal Information :</h2>
                         <table class="min-w-full text-left text-sm font-light" >
                         <thead class="border-b font-medium dark:border-neutral-500  border-2 border-gray-600 bg-gray-300">
                             <tr>
                                 <th scope="col" class="px-6 py-4">#</th>
-                                <th scope="col" class="px-6 py-4">Name</th>
-                                <th scope="col" class="px-6 py-4">Role</th>
+                                <th scope="col" class="px-6 py-4">Username</th>
+                                <!-- <th scope="col" class="px-6 py-4">Role</th> -->
                                 <th scope="col" class="px-6 py-4">Ville</th>
                                 <th scope="col" class="px-6 py-4">Quartier</th>
                                 <th scope="col" class="px-6 py-4">rue</th>
@@ -117,7 +112,7 @@
                                 echo "<tr>";
                                 echo "<td scope='col' class='px-6 py-4'>" . $user['id'] . "</th>";
                                 echo "<td scope='col' class='px-6 py-4'>" . $user['username'] . "</th>";
-                                echo "<td scope='col' class='px-6 py-4'>" . $user['role_id'] . "</th>";
+                                // echo "<td scope='col' class='px-6 py-4'>" . $user['role_id'] . "</th>";
 
                                 $find_address = "SELECT * FROM address WHERE id = " . $user['address_id'] ."";
                                 $run_find_address = mysqli_query($cnx, $find_address);
@@ -141,8 +136,8 @@
             </div>
             </div>
                             
-
-            <table class="min-w-full mt-8 text-left text-sm font-light" >
+            <h2 class="text-xl py-4 mt-8">Accounts Information :</h2>
+            <table class="min-w-full  text-left text-sm font-light mb-12" >
                         <thead class="border-b font-medium dark:border-neutral-500  border-2 border-gray-600 bg-gray-300">
                             <tr>
                                 <th scope="col" class="px-6 py-4">Account id</th>

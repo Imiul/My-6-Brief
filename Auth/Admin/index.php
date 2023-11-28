@@ -94,11 +94,12 @@ if (isset($_POST['logout'])) {
                 <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
                     <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
                     <div class="overflow-hidden">
+                        <h2 class="text-xl py-4">Your Information :</h2>
                         <table class="min-w-full text-left text-sm font-light" >
                         <thead class="border-b font-medium dark:border-neutral-500  border-2 border-gray-600 bg-gray-300">
                             <tr>
                                 <th scope="col" class="px-6 py-4">#</th>
-                                <th scope="col" class="px-6 py-4">Name</th>
+                                <th scope="col" class="px-6 py-4">Username</th>
                                 <th scope="col" class="px-6 py-4">Role</th>
                                 <th scope="col" class="px-6 py-4">Ville</th>
                                 <th scope="col" class="px-6 py-4">Quartier</th>

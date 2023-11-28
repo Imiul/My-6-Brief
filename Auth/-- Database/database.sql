@@ -15,7 +15,7 @@ CREATE TABLE address (
     rue VARCHAR(50),
     code_postal VARCHAR(10),
     email VARCHAR(50),
-    telephone INT
+    telephone INT 
 );
 
 -- User Table 3
@@ -25,7 +25,7 @@ CREATE TABLE user (
     password VARCHAR(255), -- Adjust the length as needed
     role_id VARCHAR(20),
     address_id INT,
-    FOREIGN KEY (address_id) REFERENCES address(id)
+    FOREIGN KEY (address_id) REFERENCES address(id) ON DELETE CASCADE
 );
 
 -- Account Table 4
@@ -35,7 +35,7 @@ CREATE TABLE account (
     devise VARCHAR(10),
     balance DECIMAL(10, 2), -- Adjust precision and scale as needed
     user_id INT,
-    FOREIGN KEY (user_id) REFERENCES user(id)
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
 -- Transaction Table 5
 CREATE TABLE transaction (
@@ -43,7 +43,7 @@ CREATE TABLE transaction (
     type ENUM('credit', 'debit'),
     amount DECIMAL(10, 2), -- Adjust precision and scale as needed
     account_id INT,
-    FOREIGN KEY (account_id) REFERENCES account(id)
+    FOREIGN KEY (account_id) REFERENCES account(id) ON DELETE CASCADE
 );
 
 -- Bank Table 6
@@ -60,7 +60,7 @@ CREATE TABLE agence (
     longitude INT,
     latitude INT,
     bank_id INT,
-    FOREIGN KEY (bank_id) REFERENCES bank(id)
+    FOREIGN KEY (bank_id) REFERENCES bank(id) ON DELETE CASCADE
 );
 
 -- Distributeur Table 8
@@ -70,7 +70,7 @@ CREATE TABLE distributeur (
     longitude INT,
     latitude INT,
     agence_id INT,
-    FOREIGN KEY (agence_id) REFERENCES agence(id)
+    FOREIGN KEY (agence_id) REFERENCES agence(id) ON DELETE CASCADE
 );
 
 

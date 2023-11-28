@@ -184,7 +184,7 @@
                                     echo "<td class='whitespace-nowrap px-6 py-4'>" . $transaction['account_id'] ."</td>";
 
                                     echo "<td class='whitespace-nowrap px-6 py-4'>";
-                                    echo "<button class='bg-blue-600 py-2 px-8 text-white font-bold'>Edit</button>";
+                                    echo "<a href='Transactions.php?upd=" . $transaction['id'] . "' class='bg-blue-600 py-2 px-8 text-white font-bold'>Edit</a>";
                                     echo "<a href='Transactions.php?rm=" . $transaction['id'] . "' class='bg-red-600 py-2 ml-2 px-8 text-white font-bold'>Remove</a>";
                                     echo "</td>";
                                     echo "</tr>";

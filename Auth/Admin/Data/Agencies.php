@@ -56,6 +56,26 @@
         header('Location: ../../Login.php');
         exit();
     }
+    
+    if (isset($_POST['update_agency'])) {
+
+        $ag_id_to_update = $_GET['upd'];
+
+        $up_agenceName = $_POST['update_agenceName'];
+        $up_longitude = $_POST['update_longitude'];
+        $up_laltitude = $_POST['update_laltitude'];
+
+        $update_query = "
+            UPDATE agence 
+            SET bank_name = '$up_agenceName', longitude = '$up_longitude', latitude = '$up_laltitude'
+            WHERE id = $ag_id_to_update;
+        ";
+
+        $run_update_query = mysqli_query($cnx, $update_query);
+        echo "<script>window.alert('Agency Updated Succesfully');</script>";
+        header("Location: Agencies.php");
+    }
+
 ?>
 
 <!DOCTYPE html>
@@ -111,7 +131,7 @@
 
 
         <!-- PAGE CONTENT ===================== -->
-        <section class="mt-20 mx-auto max-w-7xl py-6 sm:px-6 lg:px-8" >
+        <section class="mt-20 mx-auto max-w-7xl py-6 sm:px-6 lg:px-8" id="add" >
             <form method="post" class="grid gap-4 grid-cols-2 border-b-4 border-gray-600 pb-4">
                 <select name="bankId" class="pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
                     <option value="0">Choose bank</option>
@@ -134,7 +154,7 @@
 
 
         <!-- PAGE CONTENT ===================== -->
-        <main>
+        <main id="show" >
             <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
             <div class="flex flex-col">
                 <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -153,6 +173,10 @@
                         </thead>
                         <tbody>
                             <?php
+                            if (isset($_GET['upd'])) {
+                                
+
+                            }
                                 foreach($agenceData as $agence) {
                                     echo "<tr class='border-b dark:border-neutral-500'>";
 
@@ -163,7 +187,7 @@
                                     echo "<td class='whitespace-nowrap px-6 py-4'>" . $agence['bank_id'] . "</td>";
 
                                     echo "<td class='whitespace-nowrap px-6 py-4'>";
-                                    echo "<button class='bg-blue-600 mr-4 py-2 px-8 text-white font-bold'>Edit</button>";
+                                    echo "<a href='Agencies.php?upd=" . $agence['id'] . "' class='bg-blue-600 mr-4 py-2 px-8 text-white font-bold'>Edit</a>";
                                     echo "<a href='Agencies.php?rm=" . $agence['id'] . "' class='bg-red-600 py-2 px-8 text-white font-bold'>Remove</a>";
                                     echo "</td>";
                                     echo "</tr>";
@@ -178,6 +202,54 @@
         </div>
         </main>
     </div>
+
+
+
+
+
+    <?php
+        if(isset($_GET['upd'])) {
+            
+            echo "
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        document.getElementById('update').classList.remove('hidden');
+                        document.getElementById('add').classList.add('hidden');
+                        document.getElementById('show').classList.add('hidden');
+                    });
+                </script>
+            ";
+    
+            $id_to_update = $_GET['upd'];
+            $fetching = "SELECT * FROM agence WHERE id = $id_to_update";
+            $run_fetching = mysqli_query($cnx, $fetching);
+            
+            $row = mysqli_fetch_assoc($run_fetching);
+        }
+    ?>
+
+
+
+
+
+    <section class="hidden mt-20 mx-auto max-w-7xl py-6 sm:px-6 lg:px-8" id="update" >
+            <form method="post" class="grid gap-4 grid-cols-2 border-b-4 border-gray-600 pb-4">
+                <select name="bankId" class="pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
+                    <?php
+                        $find_bankname = "SELECT * FROM bank WHERE id = " . $row['bank_id'] .";";
+                        $fetch_find_bankname = mysqli_query($cnx, $find_bankname);
+
+                        $row_b = mysqli_fetch_assoc($fetch_find_bankname);
+                        echo "<option value='' > " . $row_b['name'] ."</option>";
+                    ?>
+                </select>    
+                <input name="update_agenceName" type="text" <?php echo "value='" . $row['bank_name'] . "'";?> class=" pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
+                <input name="update_longitude" type="text" <?php echo "value='" . $row['longitude'] . "'";?> class=" pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
+                <input name="update_laltitude" type="text" <?php echo "value='" . $row['latitude'] . "'";?>class=" pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
+
+                <button name="update_agency" type="submit" class="bg-gray-600 text-white text-xl rounded">Update Agency</button>
+            </form>
+        </section>
 
 
 </body>

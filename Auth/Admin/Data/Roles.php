@@ -32,10 +32,32 @@
 
         $run_query = mysqli_query($cnx, $query);
         echo "<script>window.alert('Role Deleated Succesfully');</script>";
+        header("Location: Roles.php");
+    }
+
+
+    
+
+    if (isset($_POST['update_role'])) {
+
+        $updatedRole = $_POST['updatedRole'];
+
+        $upd_query = "
+            UPDATE role
+            SET name = '$updatedRole'
+            WHERE id = ". $_GET['upd']. ";
+        ";
+
+        $run_upd_query = mysqli_query($cnx, $upd_query);
+
+        echo "<script>window.alert('Role Updated Succesfully');</script>";
+        header("Location: Roles.php");
+
     }
 
     $fetchRoles = "SELECT * FROM role;";
     $rolesData = $cnx->query($fetchRoles);
+    
 
     if (isset($_POST['logout'])) {
         session_unset(); // Unset all session variables
@@ -107,7 +129,7 @@
 
 
         <!-- PAGE CONTENT ===================== -->
-        <main>
+        <main id="show">
             <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
             <div class="flex flex-col">
                 <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -129,7 +151,7 @@
                                 echo "<td class='whitespace-nowrap px-6 py-4 font-medium'>" . $role['id'] . "</td>";
                                 echo "<td class='whitespace-nowrap px-6 py-4'>" . $role['name'] . "</td>";
                                 echo "<td class='whitespace-nowrap px-6 py-4'>";
-                                echo "<button class='bg-blue-600 mr-4 py-2 px-8 text-white font-bold'>Edit</button>";
+                                echo "<a href='Roles.php?upd=" . $role['id'] . "' class='bg-blue-600 mr-4 py-2 px-8 text-white font-bold'>Edit</a>";
                                 echo "<a href='Roles.php?rm=" . $role['id'] . "' class='bg-red-600 py-2 px-8 text-white font-bold'>Remove</a>";
                                 echo "</td>";
                                 echo "</tr>";
@@ -147,6 +169,34 @@
         </main>
     </div>
 
+
+    <?php
+        if(isset($_GET['upd'])) {
+            
+            echo "
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        document.getElementById('update').classList.remove('hidden');
+                        document.getElementById('add').classList.add('hidden');
+                        document.getElementById('show').classList.add('hidden');
+                    });
+                </script>
+            ";
+    
+            $id_to_update = $_GET['upd'];
+            $fetching = "SELECT * FROM role WHERE id = $id_to_update";
+            $run_fetching = mysqli_query($cnx, $fetching);
+            
+            $row = mysqli_fetch_assoc($run_fetching);
+        }
+
+    ?>
+    <section id="update" class="hidden mt-20 mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+            <form method="post" class="grid gap-4 grid-cols-2 border-b-4 border-gray-600 pb-4">
+                <input name="updatedRole" type="text" <?php echo "value='" . $row['name'] . "'";?> class="pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
+                <button type="submit" name="update_role" class="bg-gray-600 text-white text-xl rounded">Update Role</button>
+            </form>
+        </section>
 
 </body>
 </html>

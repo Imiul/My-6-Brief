@@ -82,7 +82,8 @@
                     <div class=" flex items-baseline space-x-4">
                     <a href="Data.php"  class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium" >Your Personal Data</a>
                     <a href="my_transaction.php" class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium">Transaction's</a>
-                    </div>
+                    <a href="Reset_password.php" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Reset Password</a>    
+                </div>
                 </div>
                 </div>
                 <div class="hidden md:block">
@@ -108,16 +109,9 @@
         </nav>
 
 
-        <!-- HEADER ===================== -->
-        <header class="bg-white shadow">
-            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold tracking-tight text-gray-900">User Dashboard</h1>
-            </div>
-        </header>
-
-
         <section id="add" class="mt-12 mx-auto max-w-7xl py-6 sm:px-6 lg:px-8 " >
             <!-- <h3 class="sm:px-20">Add A User</h3> -->
+            <h2 class="text-xl py-4">Add A Transaction :</h2>
             <form method="post" class="grid gap-4 grid-cols-2 border-b-4 border-gray-600 pb-4">
                 <select name="AccountId" class="pl-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6">
                     <option value="0">Choose One Of Your Account</option>
@@ -157,49 +151,41 @@
                 <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
                     <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
                     <div class="overflow-hidden">
+                        <h2 class="text-xl py-4">Transaction List :</h2>
                         <table class="min-w-full text-left text-sm font-light" >
                         <thead class="border-b font-medium dark:border-neutral-500  border-2 border-gray-600 bg-gray-300">
                             <tr>
                                 <th scope="col" class="px-6 py-4">#</th>
-                                <th scope="col" class="px-6 py-4">Name</th>
-                                <th scope="col" class="px-6 py-4">Role</th>
-                                <th scope="col" class="px-6 py-4">Ville</th>
-                                <th scope="col" class="px-6 py-4">Quartier</th>
-                                <th scope="col" class="px-6 py-4">rue</th>
-                                <th scope="col" class="px-6 py-4">code postal</th>
-                                <th scope="col" class="px-6 py-4">email</th>
-                                <th scope="col" class="px-6 py-4">phone</th>
+                                <th scope="col" class="px-6 py-4">type</th>
+                                <th scope="col" class="px-6 py-4">amount</th>
+                                <th scope="col" class="px-6 py-4">account id</th>
                             </tr>
                         </thead>
                         <tbody class=" border-2 border-gray-600">
 
                         <?php
+                            foreach($run_find_user_id as $user) {
+                                                        
+                                $id_to_find = $user['id'];
+                                $fetchaccount = "SELECT * FROM account WHERE user_id = $id_to_find";
+                                $data = $cnx->query($fetchaccount);
 
-                            $user_name = $_SESSION['name'];
+                                foreach($data as $user_account) {
 
-                            $find_username = "SELECT * FROM user WHERE username = '$user_name'";
-                            $run_find_username = mysqli_query($cnx, $find_username);
+                                    $account_id = $user_account['id'];
+                                    $fetchtransaction = "SELECT * FROM transaction WHERE account_id = $account_id";
+                                    $run_fetchtransaction = mysqli_query($cnx, $fetchtransaction);
 
-                            foreach($run_find_username as $user) {
-                                
-                                echo "<tr>";
-                                echo "<td scope='col' class='px-6 py-4'>" . $user['id'] . "</th>";
-                                echo "<td scope='col' class='px-6 py-4'>" . $user['username'] . "</th>";
-                                echo "<td scope='col' class='px-6 py-4'>" . $user['role_id'] . "</th>";
+                                    foreach($run_fetchtransaction as $transaction) {
+                                        echo "<tr class='border-2 border-gray-600'>";
+                                        echo "<td scope='col' class='px-6 py-4'>" . $transaction['id'] . " </td>";
+                                        echo "<td scope='col' class='px-6 py-4'>" . $transaction['type'] . " </td>";
+                                        echo "<td scope='col' class='px-6 py-4'>" . $transaction['amount'] . " </td>";
+                                        echo "<td scope='col' class='px-6 py-4'>" . $transaction['account_id'] . " </td>";
+                                        echo "</td >";
+                                    }
 
-                                $find_address = "SELECT * FROM address WHERE id = " . $user['address_id'] ."";
-                                $run_find_address = mysqli_query($cnx, $find_address);
-
-                                foreach($run_find_address as $addressInfo) {
-                                    echo "<td scope='col' class='px-6 py-4'>" . $addressInfo['ville'] . "</th>";
-                                    echo "<td scope='col' class='px-6 py-4'>" . $addressInfo['quartier'] . "</th>";
-                                    echo "<td scope='col' class='px-6 py-4'>" . $addressInfo['rue'] . "</th>";
-                                    echo "<td scope='col' class='px-6 py-4'>" . $addressInfo['code_postal'] . "</th>";
-                                    echo "<td scope='col' class='px-6 py-4'>" . $addressInfo['email'] . "</th>";
-                                    echo "<td scope='col' class='px-6 py-4'>" . $addressInfo['telephone'] . "</th>";
                                 }
-
-                                echo "</tdscope=>";
                             }
                         ?>
                         </tbody>
