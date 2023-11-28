@@ -3,6 +3,12 @@
 session_start();
 include('-- Database/db-connection.php');
 
+if ($_SESSION["user_id"] && $_SESSION["user_type"] == "Admin" ) {
+    header("Location: Admin/index.php");
+} else {
+    header("Location: User/Data.php");
+}
+
 if (isset($_POST['login'])) {
 
     $username = $_POST['username'];
